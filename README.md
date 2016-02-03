@@ -1,4 +1,4 @@
-# crierbot
+# CrierBot
 Бот оповещения с помощью Telegram
 
 http://crierbot.appspot.com/
