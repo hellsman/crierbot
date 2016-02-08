@@ -60,11 +60,17 @@
               </p>
               <p>
                 Пример скрипта уведомлений для zabbix:
-<pre> 
+<pre>
 #/bin/bash
 wget -a "/tmp/alert.log" "http://crierbot.appspot.com/$1/send?message=$2"
 </pre>
-
+              </p>
+              <p>
+                А ещё можно слать уведомления с базовой поддержкой <a href="https://core.telegram.org/bots/api#markdown-style">Markdown</a> или <a href="https://core.telegram.org/bots/api#html-style">HTML</a>:
+<pre>
+#/bin/bash
+wget -a "/tmp/alert.log" "http://crierbot.appspot.com/$1/send?mode=markdown&amp;message=$2"
+</pre>
               </p>
           </div>
         </div>

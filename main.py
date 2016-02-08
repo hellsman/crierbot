@@ -21,7 +21,7 @@ BASE_URL = 'https://api.telegram.org/bot' + TOKEN + '/'
 class Chat(ndb.Model):
     # key name: str(apikey)
     chat_id = ndb.IntegerProperty()
-    
+
 # ================================
 
 def token():
@@ -42,7 +42,7 @@ def createChat(chat_id):
     else:
         return chat.id()
 
-    
+
 def deleteChat(chat_id):
     pass
 
@@ -57,12 +57,15 @@ def getChat(token):
 class MessageHandler(webapp2.RequestHandler):
     def get(self, **kwargs):
 
-        def sendMessage(chat_id, msg):
-            resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
+        def sendMessage(chat_id, msg, mode):
+            payload = {
                 'chat_id': str(chat_id),
                 'text': msg.encode('utf-8'),
                 'disable_web_page_preview': 'true',
-            })).read()
+            }
+            if mode: payload.update({'parse_mode': mode})
+
+            resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode(payload)).read()
 
         user = kwargs['user']
         message = self.request.get('message')
@@ -75,11 +78,19 @@ class MessageHandler(webapp2.RequestHandler):
             self.response.set_status(400)
             self.response.write('<html><head><title>400 Bad Request</title></head><body><h1>400 Bad Request</h1>User Unknown.<br /><br /></body></html>')
             return
-        sendMessage(chat_id, message)
-        self.response.write('')
-        
 
-        
+        mode = self.request.get('mode')
+        if not mode: mode = False
+        elif not mode or mode.lower() not in ['markdown', 'html']:
+            self.response.set_status(400)
+            self.response.write('<html><head><title>400 Bad Request</title></head><body><h1>400 Bad Request</h1>Parse mode Unknown.<br /><br /></body></html>')
+            return
+
+        sendMessage(chat_id, message, mode)
+        self.response.write('')
+
+
+
 # ================================
 
 class HomeHandler(webapp2.RequestHandler):
