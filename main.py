@@ -6,6 +6,7 @@ import urllib
 import urllib2
 import string
 import random
+import re
 from settings import TOKEN, HOOK_TOKEN
 
 # standard app engine imports
@@ -104,6 +105,9 @@ class hookHandler(webapp2.RequestHandler):
         fr = message.get('from')
         chat = message['chat']
         chat_id = chat['id']
+        chat_type = chat['type']
+
+        cmd_pattern = '^\/start@\w+bot$'
 
         if not text:
             logging.info('no text')
@@ -121,7 +125,7 @@ class hookHandler(webapp2.RequestHandler):
                 resp = None
 
         if text.startswith('/'):
-            if text == '/start':
+            if text == '/start' or (chat_type in ['group', 'supergroup'] and re.search(cmd_pattern, text) is not None):
                 tkn = createChat(chat_id)
                 reply(tkn)
 #            elif text == '/token':
