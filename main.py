@@ -57,15 +57,19 @@ def getChat(token):
 class MessageHandler(webapp2.RequestHandler):
     def get(self, **kwargs):
 
-        def sendMessage(chat_id, msg):
-            resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
+        def sendMessage(chat_id, msg, mode):
+            payload = {
                 'chat_id': str(chat_id),
                 'text': msg.encode('utf-8'),
                 'disable_web_page_preview': 'true',
-            })).read()
+            }
+            if mode: payload.update({'parse_mode': mode})
+
+            resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode(payload)).read()
 
         user = kwargs['user']
         message = self.request.get('message')
+        mode = self.request.get('mode')
         if not message:
             self.response.set_status(400)
             self.response.write('<html><head><title>400 Bad Request</title></head><body><h1>400 Bad Request</h1>The Message is empty.<br /><br /></body></html>')
@@ -75,7 +79,12 @@ class MessageHandler(webapp2.RequestHandler):
             self.response.set_status(400)
             self.response.write('<html><head><title>400 Bad Request</title></head><body><h1>400 Bad Request</h1>User Unknown.<br /><br /></body></html>')
             return
-        sendMessage(chat_id, message)
+        if not mode: mode = False
+        elif not mode or mode.lower() not in ['markdown', 'html']:
+            self.response.set_status(400)
+            self.response.write('<html><head><title>400 Bad Request</title></head><body><h1>400 Bad Request</h1>Parse mode Unknown.<br /><br /></body></html>')
+            return
+        sendMessage(chat_id, message, mode)
         self.response.write('')
         
 
